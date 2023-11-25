@@ -1,6 +1,14 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+// import HelloWorld from './components/HelloWorld.vue'
+
+// make variable logged in false
+// let loggedIn = false
+
+// check cookie
+// if (document.cookie.indexOf('token') === -1) {
+  // window.location.href = '/login'
+// }
 </script>
 
 <template>

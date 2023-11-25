@@ -18,8 +18,42 @@
 
 <script>
 export default {
+    
+
 
 }
+const url = "http://localhost:8000"
+
+function login() {
+    console.log('login')
+    // get username and password
+    // const email = document.getElementById('email').value
+    // const password = document.getElementById('password').value
+    let email = "GG2@telekom.sk"
+    let password = "heslo123"
+    console.log(email)
+    console.log(password)
+    // send request to backend
+    fetch(url + '/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({email: email, password: password})
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data)
+        // save token in cookie
+        document.cookie = 'token=' + data.token
+        // redirect to home
+        window.location.href = '/'
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 </script>
 
 <style scoped>
