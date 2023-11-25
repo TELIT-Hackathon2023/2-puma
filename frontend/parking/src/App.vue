@@ -4,24 +4,72 @@ import HelloWorld from './components/HelloWorld.vue'
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <main>
+    <header>
+      <div class="navbar">
+        <img src="/Telekom.png" alt="" class="logo">
+        <RouterLink to="/account">
+          <!-- <img src="/user-solid.svg" alt="" class="people"> -->
+          <i class="fa-solid fa-user people fa-2xl black"></i>
+        </RouterLink>
+        
+      </div>
+      <!-- <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" /> -->
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+      <!-- <div class="wrapper"> -->
+        <!-- <HelloWorld msg="You did it!" /> -->
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
+        <!-- <nav> -->
+          <!--  -->
+          <!-- <RouterLink to="/about">About</RouterLink> -->
+        <!-- </nav> -->
+      <!-- </div> -->
+    </header>
 
-  <RouterView />
+    <RouterView />
+  </main>
 </template>
 
 <style scoped>
-header {
+
+.navbar {
+  background-color: #E10075;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  margin-left: 50px;
+  height: 50%;
+  
+  /* float: left; */
+  /* display: block; */
+  /* margin: 0 auto 2rem; */
+  /* width: 200px; */
+  /* height: 100px; */
+  /* padding: 0px 0px 0px 0px; */
+}
+
+.people {
+  margin-right: 50px;
+  height: 60%;
+  color: white;
+  /* float: left; */
+  /* display: block; */
+  /* margin: 0 auto 2rem; */
+  /* width: 200px; */
+  /* height: 100px; */
+  /* padding: 0px 0px 0px 0px; */
+}
+
+
+/* header {
   line-height: 1.5;
   max-height: 100vh;
 }
@@ -81,5 +129,5 @@ nav a:first-of-type {
     padding: 1rem 0;
     margin-top: 1rem;
   }
-}
+} */
 </style>

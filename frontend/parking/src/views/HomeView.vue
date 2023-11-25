@@ -1,9 +1,11 @@
 <script setup>
-import TheWelcome from '../components/TheWelcome.vue'
+// import TheWelcome from '../components/TheWelcome.vue'
+import LoginBox from '../components/LoginBox.vue'
 </script>
 
 <template>
   <main>
-    <TheWelcome />
+    <LoginBox />
+    <!-- <TheWelcome /> -->
   </main>
 </template>
