@@ -3,10 +3,8 @@
     <div class="login-box">
         <img src="/square-parking-solid.svg" class="icon" alt="">
         <h1>Login</h1>
-        <div class="textbox">
         <!-- <i class="fas fa-user"></i> -->
-        <input type="text" placeholder="Username" name="" value="">
-        </div>
+        <input type="text" placeholder="" name="" value="" class="textbox">
 <!--     
         <div class="textbox">
         <i class="fas fa-lock"></i>
@@ -81,30 +79,25 @@ export default {
     padding: 13px 0;
 }
 
-.textbox {
+/* .textbox {
     width: 100%;
     overflow: hidden;
     font-size: 20px;
     padding: 8px 0;
     margin: 8px 0;
     border-bottom: 1px solid #4caf50;
-}
+} */
 
-.textbox i {
-    width: 26px;
-    float: left;
-    text-align: center;
-}
-
-.textbox input {
-    border: none;
-    outline: none;
+.textbox {
+    
     background: none;
     color: white;
     font-size: 18px;
     width: 80%;
-    float: left;
-    margin: 0 10px;
+    height: 60px;
+    border: 2px solid #E10075;
+    border-radius: 15px;
+    margin-top: 100px;
 }
 
 .btn {
