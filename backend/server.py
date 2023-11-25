@@ -82,9 +82,9 @@ def authenticate_user(email: str, password: str):
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.today() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.today() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -109,6 +109,12 @@ async def get_current_user(token: str):
     if user is None:
         raise credentials_exception
     return user
+
+async def get_role_info(role: str):
+    role_info = app.database["roles"].find_one({"name": role})
+    if role_info is None:
+        raise HTTPException(status_code=400, detail="Role not found")
+    return role_info
 
 
 @app.get("/")
@@ -159,7 +165,7 @@ async def register(
     user_dict["hashed_password"] = get_password_hash(user_dict["password"])
     del user_dict["password"]
     # print(user_dict)
-    user_dict.update({"created_at": datetime.utcnow()})
+    user_dict.update({"created_at": datetime.today()})
     user_dict.update({"_id": user_dict["email"]})
     app.database["accounts"].insert_one(user_dict)
     return {"message": "success"}
@@ -182,47 +188,86 @@ class ReservationCreate(BaseModel):
     license_plate: str
     spot_id: int
     start_time: str
-    end_time: str
+    # end_time: str
 
+
+def get_today():
+    return datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+
+def get_higest_id(collection: str):
+    max_id = 0
+    for document in app.database[collection].find({}):
+        if document["_id"] > max_id:
+            max_id = document["_id"]
+    return max_id
 
 @app.post("/reservation/create")
 async def create_reservation(
     reservation: ReservationCreate
 ):
+    # return 1
     #TODO
     #Check reservations only one day ahead and if use already has reservation
     user = await get_current_user(reservation.access_token)
+    role_info = await get_role_info(user["status"])
     #Check if user already exists
-    print(user["email"])
+    # print(user["email"])
     if not get_user(user["email"]):
         raise HTTPException(status_code=400, detail="Email not registered", status="failed")
-    if app.database["reservations"].find_one({"email": user["email"]}):
-        raise HTTPException(status_code=400, detail="User already has reservation", status="failed")
-    if app.database["reservations"].find_one({"license_plate": reservation.license_plate}):
-        raise HTTPException(status_code=400, detail="License plate already has reservation", status="failed")
-    if app.database["spots"].find_one({"_id": reservation.spot_id})["occupied"]:
-        raise HTTPException(status_code=400, detail="Spot is already occupied", status="failed", reason="occupied")
-    if app.database["spots"].find_one({"_id": reservation.spot_id})["reserved"]:
-        raise HTTPException(status_code=400, detail="Spot is already reserved", status="failed", reason="reserved")
-    #Convert start_time, end_time to datetime
+    spot_dict = app.database["spots"].find_one({"_id": reservation.spot_id})
+    # if app.database["reservations"].find_one({"email": user["email"]}):
+        # raise HTTPException(status_code=400, detail="User already has reservation", status="failed")
+    # if app.database["reservations"].find_one({"license_plate": reservation.license_plate}):
+        # raise HTTPException(status_code=400, detail="License plate already has reservation", status="failed")
+    #Check if spot is already reserved in time
+    
     reservation.start_time = datetime.strptime(reservation.start_time, "%Y-%m-%d")
-    reservation.end_time = datetime.strptime(reservation.end_time, "%Y-%m-%d")
-    if reservation.start_time < datetime.utcnow():
+    # reservation.end_time = datetime.strptime(reservation.end_time, "%Y-%m-%d")
+
+    # if spot_dict != None:
+    for time in spot_dict["reserved_time"]:
+        print(time, "tt", reservation.start_time)
+        if time == reservation.start_time:
+            raise HTTPException(status_code=400, detail="Spot is already reserved")
+    # if reservation.start_time in spot_dict["reserved_until"]:
+        # raise HTTPException(status_code=400, detail="Spot is already reserved")
+    #Check if spot is already occupied in time
+    if reservation.start_time == get_today() and spot_dict["occupied"]:
+        raise HTTPException(status_code=400, detail="Spot is already occupied")
+    # if app.database["spots"].find_one({"_id": reservation.spot_id})["occupied"]:
+        # raise HTTPException(status_code=400, detail="Spot is already occupied")
+    
+    # if app.database["spots"].find_one({"_id": reservation.spot_id})["reserved"]:
+        # raise HTTPException(status_code=400, detail="Spot is already reserved")
+    
+    #Already have reservation for this day
+    if app.database["reservations"].find_one({"email": user["email"], "start_time": reservation.start_time}):
+        raise HTTPException(status_code=400, detail="You already have a reservation for this day")
+    #Convert start_time, end_time to datetime
+    print(reservation.start_time, get_today(), timedelta(days=1))
+    if reservation.start_time < get_today():
         raise HTTPException(status_code=400, detail="Start time is in the past")
     
-    # if reservation is 2 days before
-    if user["status"] == "employee":
-        if reservation.start_time - timedelta(days=2) < datetime.utcnow():
-            raise HTTPException(status_code=400, detail="You can only reserve a spot 2 days ahead")
-    elif user["status"] == "manager":
-        if reservation.start_time - timedelta(days=7) < datetime.utcnow():
-            raise HTTPException(status_code=400, detail="You can only reserve a spot 7 days ahead")
+    # can only reverse cetain days in future
+    if reservation.start_time - timedelta(days=role_info["days_ahead"]) > get_today():
+        raise HTTPException(status_code=400, detail=f"You can only reserve a spot {role_info['days_ahead']} days ahead")
+    
+    #Check if user has already reserved too many spots
+    if app.database["reservations"].count_documents({"email": user["email"]}) >= role_info["reservation_limit"]:
+        raise HTTPException(status_code=400, detail=f"You can only reserve {role_info['reservation_limit']} spots")
     reservation_dict = reservation.model_dump()
     del reservation_dict["access_token"]
-    reservation_dict.update({"created_at": datetime.utcnow()})
+    reservation_dict.update({"created_at": datetime.today()})
     reservation_dict.update({"email": user["email"]})
-    reservation_dict.update({"_id": reservation_dict["license_plate"]})
+    # generate reservation id based on already existing reservations
+    # reservation_dict.update({"_id": app.database["reservations"].count_documents({}) + 1})
+    reservation_dict.update({"_id": get_higest_id("reservations") + 1})
     app.database["reservations"].insert_one(reservation_dict)
+    #Update spot, make reserver_by and until list
+    app.database["spots"].update_one({"_id": reservation.spot_id}, {"$set": {"reserved": True,
+    "reserved_by": spot_dict["reserved_by"] + [user["email"]],
+    "reserved_time": spot_dict["reserved_time"] + [reservation.start_time]}})
+    # app.database["spots"].update_one({"_id": reservation.spot_id}, {"$set": {"reserved": True, "reserved_by": user["email"], "reserved_until": reservation.end_time}})
     return {"message": "success", "status": "success"}
 
 class ReservationGet(BaseModel):
@@ -234,21 +279,51 @@ async def get_reservation(
     reservation: ReservationGet
 ):
     user = await get_current_user(reservation.access_token)
-    reservation = app.database["reservations"].find_one({"email": user["email"]})
-    if not reservation:
-        raise HTTPException(status_code=400, detail="No reservation found")
-    return reservation
+    reservations = app.database["reservations"].find({"email": user["email"]})
+    # reservation = app.database["reservations"].find_one({"email": user["email"]})
+    # if not reservations:
+        # raise HTTPException(status_code=400, detail="No reservation found")
+    return list(reservations)
 
 # class ReservationDelete(BaseModel):
     # access_token: str
+
+class ReservationDelete(BaseModel):
+    access_token: str
+    spot_id: int
+
+
 @app.post("/reservation/delete")
 async def delete_reservation(
-    reservation: ReservationGet
+    reservation: ReservationDelete
 ):
     user = await get_current_user(reservation.access_token)
-    reservation = app.database["reservations"].delete_one({"email": user["email"]})
-    if reservation.deleted_count == 0:
+    #if reservation id exists and belongs to user
+    # reservation = app.database["reservations"].find_one({"email": user["email"], "_id": reservation.id})
+    # if not reservation:
+        # raise HTTPException(status_code=400, detail="No reservation found")
+    #Update spot, make reserver_by and until list
+    # app.database["spots"].update_one({"_id": reservation["spot_id"]}, {"$set": {"reserved": False,
+    # "reserved_by": spot_dict["reserved_by"] + [user["email"]],
+    # "reserved_time": spot_dict["reserved_time"] + [reservation.start_time]}})
+    # app.database["spots"].update_one({"_id": reservation["spot_id"]}, {"$set": {"reserved": False, "reserved_by": [], "reserved_time": []}})
+    reservation_info = app.database["reservations"].find_one({"email": user["email"], "_id": reservation.spot_id})
+    if not reservation_info:
         raise HTTPException(status_code=400, detail="No reservation found")
+    rr = app.database["reservations"].delete_one({"email": user["email"], "_id": reservation.spot_id})
+    # if rr.deleted_count == 0:
+        # raise HTTPException(status_code=400, detail="No reservation found")
+    
+    #delete reservation from spot
+    reservation_spot = app.database["spots"].find_one({"_id": reservation.spot_id})
+    for res_spot_i, res_spot in enumerate(reservation_spot["reserved_by"]):
+        if res_spot == user["email"] and reservation_spot["reserved_time"][res_spot_i] == reservation_info["start_time"]:
+            #get current reserver_by and reserver_time array
+            print("popping index,",res_spot_i)
+            reservation_spot["reserved_by"].pop(res_spot_i)
+            reservation_spot["reserved_time"].pop(res_spot_i)
+
+            app.database["spots"].update_one({"_id": reservation.spot_id}, {"$set": {"reserved_by": reservation_spot["reserved_by"], "reserved_time": reservation_spot["reserved_time"]}})
     return {"message": "success"}
 
 @app.get("/reservation/list-all")
@@ -259,23 +334,216 @@ async def list_all_reservations():
         filtered_reservations.append({
             "spot_id": reservation["spot_id"],
             "start_time": reservation["start_time"],
-            "end_time": reservation["end_time"]
+            # "end_time": reservation["end_time"]
         })
     return filtered_reservations
 
+class AccessTokenReq(BaseModel):
+    access_token: str
 
 @app.get("/generate-spots")
-async def generate_spots():
+async def generate_spots(access_token: AccessTokenReq):
+    #if valid token
+    access_token = access_token.access_token
+    user = await get_current_user(access_token)
+    if user["status"] != "admin":
+        raise HTTPException(status_code=400, detail="Not authorized")
     for i in range(1, 16):
         app.database["spots"].insert_one({
             "_id": i,
             "location": "BCT East",
             "occupied": False,
             "occupied_by": None,
-            "reserved": False,
-            "reserved_by": None,
-            "reserved_until": None
+            "reserved_by": [],
+            "reserved_time": []
         })
+    return {"message": "success"}
+
+@app.get("/delete-spots")
+async def delete_spots(access_token: AccessTokenReq):
+    
+    access_token = access_token.access_token
+    user = await get_current_user(access_token)
+    if user["status"] != "admin":
+        raise HTTPException(status_code=400, detail="Not authorized")
+    app.database["spots"].delete_many({})
+    return {"message": "success"}
+
+@app.get("/generate-roles")
+async def generate_roles(access_token: AccessTokenReq):
+
+    access_token = access_token.access_token
+    user = await get_current_user(access_token)
+    if user["status"] != "admin":
+        raise HTTPException(status_code=400, detail="Not authorized")
+    
+    app.database["roles"].insert_one({
+        "_id": 1,
+        "name": "visitor",
+        "description": "visitor",
+        "days_ahead": 1,
+        "reservation_limit": 1
+
+    })
+    app.database["roles"].insert_one({
+        "_id": 2,
+        "name": "employee",
+        "description": "Employee",
+        "can_reserve": True,
+        "days_ahead": 2,
+        "reservation_limit": 2
+    })
+    app.database["roles"].insert_one({
+        "_id": 3,
+        "name": "manager",
+        "description": "Manager",
+        "can_reserve": True,
+        "days_ahead": 7,
+        "reservation_limit": 5
+    })
+    app.database["roles"].insert_one({
+        "_id": 4,
+        "name": "admin",
+        "description": "Admin",
+        "can_reserve": True,
+        "days_ahead": 7,
+        "reservation_limit": 5
+    })
     return {"message": "success"}
 # async def get_parking_spots():
     # return app.database["parking_spots"].find()
+
+@app.get("/parking-spots/list-all")
+async def list_all_parking_spots(access_token: AccessTokenReq):
+
+    access_token = access_token.access_token
+    user = await get_current_user(access_token)
+    #just to check if logged in ^
+    parking_spots = app.database["spots"].find({})
+    filtered_parking_spots = []
+    for parking_spot in list(parking_spots):
+        filtered_parking_spots.append({
+            "id": parking_spot["_id"],
+            "location": parking_spot["location"],
+            "occupied": parking_spot["occupied"],
+            "reserved_until": parking_spot["reserved_until"]
+        })
+    return filtered_parking_spots
+
+class CheckIn(BaseModel):
+    access_token: str
+    licence_plate: str
+
+@app.post("/check-in")
+async def check_in(check_in: CheckIn):
+
+    access_token = check_in.access_token
+    user = await get_current_user(access_token)
+    #Check if user is admin
+    if user["status"] != "admin":
+        raise HTTPException(status_code=400, detail="Not authorized")
+    #Check if license plate is reserved
+    license_plate = check_in.licence_plate
+
+    reservations = app.database["reservations"].find({"license_plate": license_plate})
+    if not reservations:
+        raise HTTPException(status_code=400, detail="No reservation found")
+    #if reservation is today
+    reservation_found = False
+    for reservation in reservations:
+        if reservation["start_time"] == get_today():
+            reservation_found = True
+            #delete reservation
+            #find reservation with license plate
+            reservation = app.database["reservations"].find_one_and_delete({"license_plate": license_plate})
+            # app.database["reservations"].delete_many({"license_plate": license_plate})
+
+            reservation_spot = app.database["spots"].find_one({"_id": reservation["spot_id"]})
+            for res_spot_i, res_spot in enumerate(reservation_spot["reserved_by"]):
+                if reservation_spot["reserved_time"][res_spot_i] == reservation["start_time"]:
+                    #get current reserver_by and reserver_time array
+                    print("popping index,",res_spot_i)
+                    reservation_spot["reserved_by"].pop(res_spot_i)
+                    reservation_spot["reserved_time"].pop(res_spot_i)
+
+                    app.database["spots"].update_one({"_id": reservation["spot_id"]}, {"$set": {"reserved_by": reservation_spot["reserved_by"], "reserved_time": reservation_spot["reserved_time"]}})
+            #Update spot, make reserver_by and until list
+            app.database["spots"].update_one({"_id": reservation["spot_id"]}, {"$set": {"occupied": True, "occupied_by": license_plate}})
+
+            return {"message": "success"}
+    if not reservation_found:
+        raise HTTPException(status_code=400, detail="No reservation found for today")
+    #Check if license plate is already checked in
+    # for reservation in reservations:
+        # if reservation["checked_in"]:
+            # raise HTTPException(status_code=400, detail="License plate already checked in")
+    
+
+class LicensePlate(BaseModel):
+    access_token: str
+    license_plate: str
+
+@app.get("/get-user-info")
+async def get_user_info(access_token: AccessTokenReq):
+    
+        access_token = access_token.access_token
+        user = await get_current_user(access_token)
+        #Check if user is admin
+        # if user["status"] != "admin":
+            # raise HTTPException(status_code=400, detail="Not authorized")
+        #Check if license plate is reserved
+
+        return {
+            "email": user["email"],
+            "first_name": user["first_name"],
+            "last_name": user["last_name"],
+            "phone": user["phone"],
+            "company_id": user["company_id"],
+            "license_plates": user["license_plates"],
+        }
+
+
+@app.post("/add-license-plate")
+async def add_license_plate(license_plate: LicensePlate):
+    
+        access_token = license_plate.access_token
+        user = await get_current_user(access_token)
+
+        license_plate = license_plate.license_plate
+        
+        #Check if license plate is already checked in
+        app.database["accounts"].find_one({"email": user["email"]})
+        for lic in user["license_plates"]:
+            if lic == license_plate:
+                raise HTTPException(status_code=400, detail="License plate already registered")
+        #Add license plate to user
+        app.database["accounts"].update_one({"email": user["email"]}, {"$set": {"license_plates": user["license_plates"] + [license_plate]}})
+        return {"message": "success"}
+
+@app.post("/remove-license-plate")
+async def remove_license_plate(license_plate: LicensePlate):
+    
+        access_token = license_plate.access_token
+        user = await get_current_user(access_token)
+
+        license_plate = license_plate.license_plate
+        
+        found_license = False
+        #Check if license plate is already checked in
+        app.database["accounts"].find_one({"email": user["email"]})
+        for lic in user["license_plates"]:
+            if lic == license_plate:
+                found_license = True
+                #check if license plate is reserved
+                if app.database["reservations"].find_one({"license_plate": license_plate}):
+                    raise HTTPException(status_code=400, detail="Cannot remove license plate, if it's reserved")
+                #check if it is used in spot rn
+                if app.database["spots"].find_one({"occupied_by": license_plate}):
+                    raise HTTPException(status_code=400, detail="Cannot remove license plate, if it's used in spot")
+                user["license_plates"].remove(lic)
+
+        if not found_license:
+            raise HTTPException(status_code=400, detail="License plate not found")
+        #Add license plate to user
+        app.database["accounts"].update_one({"email": user["email"]}, {"$set": {"license_plates": user["license_plates"]}})
+        return {"message": "success"}
