@@ -2,15 +2,17 @@
     <div class="main">
     <div class="login-box">
         <img src="/square-parking-solid.svg" class="icon" alt="">
-        <h1>Login</h1>
+        <div>
         <!-- <i class="fas fa-user"></i> -->
-        <input type="text" placeholder="" name="" value="" class="textbox">
+        <input type="text" id="email" placeholder="" name="" value="" class="textbox">
+        <input type="text" id="password" placeholder="" name="" value="" class="textbox" style="margin-top: 30px;">
+        </div>div>
 <!--     
         <div class="textbox">
         <i class="fas fa-lock"></i>
         <input type="password" placeholder="Password" name="" value="">
         </div>
-    
+        <>
         <input class="btn" type="button" name="" value="Sign in"> -->
     </div>
     </div>
@@ -89,6 +91,7 @@ function login() {
     align-items: center;
     border-radius: 30px;
     border: 3px solid #E10075;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .icon {
@@ -125,13 +128,14 @@ function login() {
 .textbox {
     
     background: none;
-    color: white;
+    color: black;
     font-size: 18px;
     width: 80%;
     height: 60px;
     border: 2px solid #E10075;
     border-radius: 15px;
     margin-top: 100px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn {
