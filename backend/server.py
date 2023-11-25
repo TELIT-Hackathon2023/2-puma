@@ -425,8 +425,7 @@ async def list_all_parking_spots(access_token: AccessTokenReq):
         filtered_parking_spots.append({
             "id": parking_spot["_id"],
             "location": parking_spot["location"],
-            "occupied": parking_spot["occupied"],
-            "reserved_until": parking_spot["reserved_until"]
+            "occupied": parking_spot["occupied"]
         })
     return filtered_parking_spots
 
