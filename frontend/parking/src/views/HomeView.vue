@@ -1,5 +1,5 @@
 <script setup>
-import TheWelcome from '../components/TheWelcome.vue'
+import HomeMain from '../components/HomeMain.vue'
 import LoginBox from '../components/LoginBox.vue'
 
 // make variable logged in false
@@ -24,7 +24,7 @@ else {
 <template>
   <main>
     <!-- render if not logged in -->
-    <LoginBox v-if="!loggedIn"/>
-    <TheWelcome v-if="loggedIn"/>
+    <HomeMain v-if="!loggedIn"/>
+    <HomeMain v-if="loggedIn"/>
   </main>
 </template>

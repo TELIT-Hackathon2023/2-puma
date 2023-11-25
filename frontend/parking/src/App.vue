@@ -34,7 +34,7 @@ import { RouterLink, RouterView } from 'vue-router'
       <!-- </div> -->
     </header>
 
-    <RouterView />
+    <RouterView/>
   </main>
 </template>
 
@@ -43,7 +43,7 @@ import { RouterLink, RouterView } from 'vue-router'
 .navbar {
   background-color: #E10075;
   overflow: hidden;
-  position: fixed;
+  /* position: fixed; */
   top: 0;
   width: 100%;
   height: 80px;
