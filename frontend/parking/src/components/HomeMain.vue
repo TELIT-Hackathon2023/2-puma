@@ -134,9 +134,10 @@ import Parking from '../components/Parking.vue'
     flex-direction: column;
     /* align-items: center; */
     justify-content: center;
-    gap: 20px;
+    gap: 12px;
     width: 100%;
-    height: 140px;
+    height: 140x;
+    padding-top: 15px;
 }
 
 .location-dropdown {
@@ -157,7 +158,8 @@ import Parking from '../components/Parking.vue'
     position: fixed;
 }
 .parking-div {
-    /* height: 100%; */
+    /* height: 10%; */
+    /* width: 350px; */
     position: fixed;
 }
 </style>
