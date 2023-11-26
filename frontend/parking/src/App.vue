@@ -15,7 +15,10 @@ import { RouterLink, RouterView } from 'vue-router'
   <main>
     <header>
       <div class="navbar">
-        <img src="/Telekom.png" alt="" class="logo">
+        <router-link to="/" class="logo">
+
+       <img src="/Telekom.png" alt="" class="logo">
+      </router-link>
         <router-link to="/account" class="people"><img src="/user-solid.svg" alt="" class="people"/></router-link>
         <!-- <RouterLink to="/account">
           <img src="/user-solid.svg" alt="" class="people">
@@ -55,7 +58,8 @@ import { RouterLink, RouterView } from 'vue-router'
 
 .logo {
   margin-left: 50px;
-  height: 50%;
+  margin-top: 4px;
+  height: 80%;
   
   /* float: left; */
   /* display: block; */
