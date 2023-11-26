@@ -3,6 +3,7 @@ import hmac
 import struct
 import time
 
+
 def generate_totp(secret_key, time_step=30, digits=6):
     current_time = int(time.time()) // time_step
     time_bytes = struct.pack('>Q', current_time)

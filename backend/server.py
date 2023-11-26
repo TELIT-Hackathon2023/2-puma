@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
-from typing import Annotated
+# from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException, status
-import fastapi
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status
+# import fastapi
+# from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -12,6 +12,25 @@ from datetime import datetime, timezone
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Cookie
 import pymongo
+
+import time
+import hashlib
+import hmac
+import struct
+
+
+def generate_totp(secret_key, time_step=60*60*12, digits=6):
+    current_time = int(time.time()) // time_step
+    time_bytes = struct.pack('>Q', current_time)
+    
+    hash_value = hmac.new(secret_key.encode('utf-8'), time_bytes, hashlib.sha1).digest()
+    offset = hash_value[-1] & 0x0F
+    dynamic_code = hash_value[offset:offset + 4]
+    totp = struct.unpack('>I', dynamic_code)[0] & 0x7FFFFFFF
+    totp %= 10 ** digits
+    totp = f"{totp:0{digits}d}"
+
+    return totp
 
 
 # class Token(BaseModel):
@@ -108,6 +127,7 @@ async def get_current_user(token: str):
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+    
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
         if email is None:
@@ -181,13 +201,19 @@ async def register(
     return {"message": "success"}
 
 
+@app.post("/logout")
+async def logout(
+    access_token: str = Cookie()
+):
+    return {"message": "success"}
+
 class UserDeleteAccount(BaseModel):
     email: str
 
 @app.post("/account/delete")
 async def delete_account(
     user: UserDeleteAccount,
-    access_token: str | None = Cookie(None)
+    access_token: str = Cookie()
 ):
     authed_user = await get_current_user(access_token)
     #Check if user already exists
@@ -220,7 +246,7 @@ def get_higest_id(collection: str):
 @app.post("/reservation/create")
 async def create_reservation(
     reservation: ReservationCreate,
-    access_token: str | None = Cookie(None)
+    access_token: str = Cookie()
 ):
     # return 1
     #TODO
@@ -273,7 +299,7 @@ async def create_reservation(
     if app.database["reservations"].count_documents({"email": user["email"]}) >= role_info["reservation_limit"]:
         raise HTTPException(status_code=400, detail=f"You can only reserve {role_info['reservation_limit']} spots")
     reservation_dict = reservation.model_dump()
-    del reservation_dict["access_token"]
+    # del reservation_dict["access_token"]
     reservation_dict.update({"created_at": datetime.today()})
     reservation_dict.update({"email": user["email"]})
     # generate reservation id based on already existing reservations
@@ -293,7 +319,7 @@ async def create_reservation(
 #Get user reservation
 @app.get("/reservation/get")
 async def get_reservation(
-    access_token: str | None = Cookie(None)
+    access_token: str = Cookie()
 ):
     user = await get_current_user(access_token)
     reservations = app.database["reservations"].find({"email": user["email"]})
@@ -313,7 +339,7 @@ class ReservationDelete(BaseModel):
 @app.post("/reservation/delete")
 async def delete_reservation(
     reservation: ReservationDelete,
-    access_token: str | None = Cookie(None)
+    access_token: str = Cookie()
 ):
     user = await get_current_user(access_token)
     #if reservation id exists and belongs to user
@@ -325,27 +351,31 @@ async def delete_reservation(
     # "reserved_by": spot_dict["reserved_by"] + [user["email"]],
     # "reserved_time": spot_dict["reserved_time"] + [reservation.start_time]}})
     # app.database["spots"].update_one({"_id": reservation["spot_id"]}, {"$set": {"reserved": False, "reserved_by": [], "reserved_time": []}})
-    reservation_info = app.database["reservations"].find_one({"email": user["email"], "_id": reservation.spot_id})
+    # print("reservation id", reservation.spot_id, "user email", user["email"])
+    reservation_info = app.database["reservations"].find_one({"email": user["email"], "spot_id": reservation.spot_id})
     if not reservation_info:
         raise HTTPException(status_code=400, detail="No reservation found")
-    rr = app.database["reservations"].delete_one({"email": user["email"], "_id": reservation.spot_id})
+    rr = app.database["reservations"].delete_one({"email": user["email"], "spot_id": reservation.spot_id})
     # if rr.deleted_count == 0:
         # raise HTTPException(status_code=400, detail="No reservation found")
     
     #delete reservation from spot
     reservation_spot = app.database["spots"].find_one({"_id": reservation.spot_id})
+    print(reservation_spot)
     for res_spot_i, res_spot in enumerate(reservation_spot["reserved_by"]):
         if res_spot == user["email"] and reservation_spot["reserved_time"][res_spot_i] == reservation_info["start_time"]:
             #get current reserver_by and reserver_time array
-            print("popping index,",res_spot_i)
+            # print("popping index,",res_spot_i)
             reservation_spot["reserved_by"].pop(res_spot_i)
             reservation_spot["reserved_time"].pop(res_spot_i)
-
-            app.database["spots"].update_one({"_id": reservation.spot_id}, {"$set": {"reserved_by": reservation_spot["reserved_by"], "reserved_time": reservation_spot["reserved_time"]}})
+            if len(reservation_spot["reserved_by"]) == 0:
+                app.database["spots"].update_one({"_id": reservation.spot_id}, {"$set": {"reserved": False, "reserved_by": reservation_spot["reserved_by"], "reserved_time": reservation_spot["reserved_time"]}})
+            else:
+                app.database["spots"].update_one({"_id": reservation.spot_id}, {"$set": {"reserved_by": reservation_spot["reserved_by"], "reserved_time": reservation_spot["reserved_time"]}})
     return {"message": "success"}
 
 @app.get("/reservation/list-all")
-async def list_all_reservations(access_token: str | None = Cookie(None)):
+async def list_all_reservations(access_token: str = Cookie()):
 
     # access_token = access_token.access_token
     await get_current_user(access_token)
@@ -363,7 +393,7 @@ class AccessTokenReq(BaseModel):
     access_token: str
 
 @app.get("/generate-spots")
-async def generate_spots(access_token: str | None = Cookie(None)):
+async def generate_spots(access_token: str = Cookie()):
     #if valid token
     # access_token = access_token.access_token
     user = await get_current_user(access_token)
@@ -382,7 +412,7 @@ async def generate_spots(access_token: str | None = Cookie(None)):
     return {"message": "success"}
 
 @app.get("/delete-spots")
-async def delete_spots(access_token: str | None = Cookie(None)):
+async def delete_spots(access_token: str = Cookie()):
     
     # access_token = access_token.access_token
     user = await get_current_user(access_token)
@@ -392,7 +422,7 @@ async def delete_spots(access_token: str | None = Cookie(None)):
     return {"message": "success"}
 
 @app.get("/generate-roles")
-async def generate_roles(access_token: str | None = Cookie(None)):
+async def generate_roles(access_token: str = Cookie()):
 
     # access_token = access_token.access_token
     user = await get_current_user(access_token)
@@ -436,7 +466,7 @@ async def generate_roles(access_token: str | None = Cookie(None)):
     # return app.database["parking_spots"].find()
 
 @app.get("/parking-spots/list-all")
-async def list_all_parking_spots(access_token: str | None = Cookie(None)):
+async def list_all_parking_spots(access_token: str = Cookie()):
     # print(access_token)
     # access_token = access_token.access_token
     user = await get_current_user(access_token)
@@ -456,8 +486,19 @@ class CheckIn(BaseModel):
     # access_token: str
     licence_plate: str
 
+# @app.post("/verify-totp")
+# async def verify_totp(access_token: str = Cookie(), totp: str = None):
+    
+#     user = await get_current_user(access_token)
+
+#     #Check if user is admin
+#     if user["status"] != "admin":
+#         raise HTTPException(status_code=400, detail="Not authorized")
+    
+#     server_totp = generate_totp(SECRET_KEY)
+
 @app.post("/check-in")
-async def check_in(check_in: CheckIn, access_token: str | None = Cookie(None)):
+async def check_in(check_in: CheckIn, access_token: str = Cookie()):
 
     user = await get_current_user(access_token)
     #Check if user is admin
@@ -505,7 +546,7 @@ class LicensePlate(BaseModel):
     license_plate: str
 
 @app.get("/get-user-info")
-async def get_user_info(access_token: str | None = Cookie(None)):
+async def get_user_info(access_token: str = Cookie()):
     
         # access_token = access_token.access_token
         user = await get_current_user(access_token)
@@ -525,7 +566,7 @@ async def get_user_info(access_token: str | None = Cookie(None)):
 
 
 @app.post("/add-license-plate")
-async def add_license_plate(license_plate: LicensePlate, access_token: str | None = Cookie(None)):
+async def add_license_plate(license_plate: LicensePlate, access_token: str = Cookie()):
     
         # access_token = license_plate.access_token
         user = await get_current_user(access_token)
@@ -542,7 +583,7 @@ async def add_license_plate(license_plate: LicensePlate, access_token: str | Non
         return {"message": "success"}
 
 @app.post("/remove-license-plate")
-async def remove_license_plate(license_plate: LicensePlate, access_token: str | None = Cookie(None)):
+async def remove_license_plate(license_plate: LicensePlate, access_token: str = Cookie()):
     
         # access_token = license_plate.access_token
         user = await get_current_user(access_token)

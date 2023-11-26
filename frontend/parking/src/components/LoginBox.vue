@@ -57,6 +57,7 @@ export default {
                     
                 })
                 .catch((error) => {
+                    alert("Server is probably not runnning")
                     console.error('Error:', error);
                 });
 

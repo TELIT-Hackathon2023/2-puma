@@ -1,12 +1,13 @@
 <template>
-    <div class="vertical-flex-box">
+    <div class="vertical-flex-box" v-if="data !== null">
         <div class="horizontal-flex-box">
-            <!-- <ParkingSpot v-for="spot in parkingSpots" :key="spot.id" :id="spot.id" :response="spot.response || ''" /> -->
-            <ParkingSpot :id="1" color="free"/>
-            <ParkingSpot :id="2" color="reserved"/>
-            <ParkingSpot :id="3" color="occupied"/>
-            <ParkingSpot :id="4"/>
-            <ParkingSpot :id="5"/>
+            <!-- <ParkingSpot v-for="spot in data" :key="spot.id" :id="spot.id"/> -->
+            <!-- ParkingSp -->
+            <ParkingSpot :id="1" color="free" :data="data"/>
+            <ParkingSpot :id="2" color="reserved" :data="data"/>
+            <ParkingSpot :id="3" color="occupied" :data="data"/>
+            <ParkingSpot :id="4" :data="data"/>
+            <ParkingSpot :id="5" :data="data"/>
         </div>
         <div class="horizontal-flex-box">
             <div class="parking-div empty top">
@@ -17,51 +18,52 @@
             </div>
         </div>
         <div class="horizontal-flex-box">
-            <ParkingSpot :id="6"/>
-            <ParkingSpot :id="7"/>
-            <ParkingSpot :id="8"/>
-            <ParkingSpot :id="9"/>
-            <ParkingSpot :id="10"/>
+            <ParkingSpot :id="6" :data="data"/>
+            <ParkingSpot :id="7" :data="data"/>
+            <ParkingSpot :id="8" :data="data"/>
+            <ParkingSpot :id="9" :data="data"/>
+            <ParkingSpot :id="10" :data="data"/>
         </div>
         <div class="horizontal-flex-box">
-            <ParkingSpot :id="11"/>
-            <ParkingSpot :id="12"/>
-            <ParkingSpot :id="13"/>
-            <ParkingSpot :id="14"/>
-            <ParkingSpot :id="15"/>
+            <ParkingSpot :id="11" :data="data"/>
+            <ParkingSpot :id="12" :data="data"/>
+            <ParkingSpot :id="13" :data="data"/>
+            <ParkingSpot :id="14" :data="data"/>
+            <ParkingSpot :id="15" :data="data"/>
         </div>
     </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref} from 'vue'
 import ParkingSpot from '../components/ParkingSpot.vue'
 
-// fetch reservations
-const url = "http://localhost:8000"
-let data = null
+let data = ref(null);
 
-fetch(url + "/parking-spots/list-all", {
+const fetchData = () => {
+  const url = 'http://localhost:8000';
+
+  fetch(url + '/parking-spots/list-all', {
     method: 'GET',
     headers: {
-    'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    credentials: 'include'
-})
-.then(response => response.json())
-.then(data => {
-    console.log(data)
-    data = data
-    // if (data.detail == "Invalid username or password") {
-    //     alert("Invalid username or password")
-    // }
-    // else {
-    //     document.cookie = `token=${data.access_token}`
-    //     window.location.href = '/'
-    // }
-    // reload
-    
-})
+    credentials: 'include',
+  })
+    .then((response) => response.json())
+    .then((rdata) => {
+      console.log(rdata);
+      // Update the reactive data
+      data.value = rdata;
+    });
+};
+
+onMounted(() =>{
+    fetchData();
+  setInterval(fetchData, 1000); // Adjust the interval as needed
+});
+
+// fetch reservations
 </script>
 
 <style scoped>
