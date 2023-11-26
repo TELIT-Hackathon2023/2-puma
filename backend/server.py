@@ -222,7 +222,7 @@ async def delete_account(
     authed_user = await get_current_user(access_token)
     #Check if user already exists
     # print("gg", get_user(user["email"]))
-    if not authed_user["email"] != user.email:
+    if authed_user["email"] != user.email:
         raise HTTPException(status_code=400, detail="Cannot authorize user to this email")
     
     a = app.database["accounts"].delete_one({"email": user.email})
