@@ -3,7 +3,7 @@
         <div class="flex">
             <div class="image-div">
                 <img src="/circle-solid-gray2.svg" alt="" class="image">
-                <span class="text-center">A1</span>
+                <span class="text-center">A{{ id }}{{ response }}</span>
             </div>
 
             
@@ -14,8 +14,12 @@
 
 <script>
 export default {
-
+    props: {
+        id: Number,
+        response: Object
+    }
 }
+// console.log(this.response)
 </script>
 
 <style scoped>

@@ -8,7 +8,7 @@ const url = "http://localhost:8000"
 
 
 // check cookie
-if (document.cookie.indexOf('token') === -1) {
+if (document.cookie.indexOf('access_token') === -1) {
   console.log('no token');
 
   // window.location.href = '/login'
@@ -24,7 +24,7 @@ else {
 <template>
   <main>
     <!-- render if not logged in -->
-    <HomeMain v-if="!loggedIn"/>
+    <LoginBox v-if="!loggedIn"/>
     <HomeMain v-if="loggedIn"/>
   </main>
 </template>

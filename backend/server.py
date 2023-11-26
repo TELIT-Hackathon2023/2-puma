@@ -9,7 +9,8 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from datetime import datetime, timezone
-
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Cookie
 import pymongo
 
 
@@ -40,6 +41,15 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 app = FastAPI()
 
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.on_event("startup")
 def startup_db_client():
@@ -353,6 +363,7 @@ async def generate_spots(access_token: AccessTokenReq):
             "_id": i,
             "location": "BCT East",
             "occupied": False,
+            "reserved": False,
             "occupied_by": None,
             "reserved_by": [],
             "reserved_time": []
@@ -414,9 +425,9 @@ async def generate_roles(access_token: AccessTokenReq):
     # return app.database["parking_spots"].find()
 
 @app.get("/parking-spots/list-all")
-async def list_all_parking_spots(access_token: AccessTokenReq):
-
-    access_token = access_token.access_token
+async def list_all_parking_spots(access_token: str | None = Cookie(None)):
+    # print(access_token)
+    # access_token = access_token.access_token
     user = await get_current_user(access_token)
     #just to check if logged in ^
     parking_spots = app.database["spots"].find({})
@@ -425,7 +436,8 @@ async def list_all_parking_spots(access_token: AccessTokenReq):
         filtered_parking_spots.append({
             "id": parking_spot["_id"],
             "location": parking_spot["location"],
-            "occupied": parking_spot["occupied"]
+            "occupied": parking_spot["occupied"],
+            "reserved": parking_spot["reserved"],
         })
     return filtered_parking_spots
 

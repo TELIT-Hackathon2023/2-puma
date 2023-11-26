@@ -1,11 +1,12 @@
 <template>
     <div class="vertical-flex-box">
         <div class="horizontal-flex-box">
-            <ParkingSpot/>
-            <ParkingSpot/>
-            <ParkingSpot/>
-            <ParkingSpot/>
-            <ParkingSpot/>
+            <!-- <ParkingSpot v-for="spot in parkingSpots" :key="spot.id" :id="spot.id" :response="spot.response || ''" /> -->
+            <ParkingSpot v-if="dataO != null" :id="1" :response="dataO"/>
+            <ParkingSpot :id="2"/>
+            <ParkingSpot :id="3"/>
+            <ParkingSpot :id="4"/>
+            <ParkingSpot :id="5"/>
         </div>
         <div class="horizontal-flex-box">
             <div class="parking-div empty top">
@@ -21,24 +22,50 @@
             <ParkingSpot/> -->
         </div>
         <div class="horizontal-flex-box">
-            <ParkingSpot/>
-            <ParkingSpot/>
-            <ParkingSpot/>
-            <ParkingSpot/>
-            <ParkingSpot/>
+            <ParkingSpot :id="6"/>
+            <ParkingSpot :id="7"/>
+            <ParkingSpot :id="8"/>
+            <ParkingSpot :id="9"/>
+            <ParkingSpot :id="10"/>
         </div>
         <div class="horizontal-flex-box">
-            <ParkingSpot/>
-            <ParkingSpot/>
-            <ParkingSpot/>
-            <ParkingSpot/>
-            <ParkingSpot/>
+            <ParkingSpot :id="11"/>
+            <ParkingSpot :id="12"/>
+            <ParkingSpot :id="13"/>
+            <ParkingSpot :id="14"/>
+            <ParkingSpot :id="15"/>
         </div>
     </div>
 </template>
 
 <script setup>
 import ParkingSpot from '../components/ParkingSpot.vue'
+
+// fetch reservations
+const url = "http://localhost:8000"
+let dataO = null
+
+fetch(url + "/parking-spots/list-all", {
+    method: 'GET',
+    headers: {
+    'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+})
+.then(response => response.json())
+.then(data => {
+    console.log(data)
+    dataO = data
+    // if (data.detail == "Invalid username or password") {
+    //     alert("Invalid username or password")
+    // }
+    // else {
+    //     document.cookie = `token=${data.access_token}`
+    //     window.location.href = '/'
+    // }
+    // reload
+    
+})
 </script>
 
 <style scoped>

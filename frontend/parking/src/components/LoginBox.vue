@@ -4,10 +4,10 @@
         <img src="/square-parking-solid.svg" class="icon" alt="">
         <div class="login-inputs">
             <p class="input-text">Email:</p>
-            <input type="text" id="email" placeholder="" name="" value="" class="textbox">
+            <input type="text" v-model="email" id="email" placeholder="" name="" value="" class="textbox">
             <p class="input-text">Password:</p>
-            <input type="password" id="password" placeholder="" name="" value="" class="textbox">
-            <input class="btn" type="button" name="" value="Sign-in"> 
+            <input type="password" v-model="password" id="password" placeholder="" name="" value="" class="textbox">
+            <input class="btn" type="button" name="" value="Sign-in" @click="signIn"> 
         </div>
 <!--     
         <div class="textbox">
@@ -22,6 +22,44 @@
 
 <script>
 export default {
+    data() {
+        return {
+            email: '',
+            password: ''
+        };
+    },
+    methods: {
+        signIn() {
+           const url = 'http://localhost:8000/login'
+              const data = {
+                email: this.email,
+                password: this.password
+              }
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                    'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.detail == "Invalid username or password") {
+                        alert("Invalid username or password")
+                    }
+                    else {
+                        document.cookie = `access_token=${data.access_token}`
+                        window.location.href = '/'
+                    }
+                    // reload
+                    
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+
+        }
+    }
 
 }
 </script>
