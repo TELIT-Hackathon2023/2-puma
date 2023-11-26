@@ -3,11 +3,11 @@
         <div class="horizontal-flex-box">
             <!-- <ParkingSpot v-for="spot in data" :key="spot.id" :id="spot.id"/> -->
             <!-- ParkingSp -->
-            <ParkingSpot :id="1" color="free" :data="data"/>
-            <ParkingSpot :id="2" color="reserved" :data="data"/>
-            <ParkingSpot :id="3" color="occupied" :data="data"/>
-            <ParkingSpot :id="4" :data="data"/>
-            <ParkingSpot :id="5" :data="data"/>
+            <ParkingSpot :id="1" :data="data" :licences="licences"/>
+            <ParkingSpot :id="2" :data="data" :licences="licences"/>
+            <ParkingSpot :id="3" :data="data" :licences="licences"/>
+            <ParkingSpot :id="4" :data="data" :licences="licences"/>
+            <ParkingSpot :id="5" :data="data" :licences="licences"/>
         </div>
         <div class="horizontal-flex-box">
             <div class="parking-div empty top">
@@ -18,18 +18,18 @@
             </div>
         </div>
         <div class="horizontal-flex-box">
-            <ParkingSpot :id="6" :data="data"/>
-            <ParkingSpot :id="7" :data="data"/>
-            <ParkingSpot :id="8" :data="data"/>
-            <ParkingSpot :id="9" :data="data"/>
-            <ParkingSpot :id="10" :data="data"/>
+            <ParkingSpot :id="6" :data="data" :licences="licences"/>
+            <ParkingSpot :id="7" :data="data" :licences="licences"/>
+            <ParkingSpot :id="8" :data="data" :licences="licences"/>
+            <ParkingSpot :id="9" :data="data" :licences="licences"/>
+            <ParkingSpot :id="10" :data="data" :licences="licences"/>
         </div>
         <div class="horizontal-flex-box">
-            <ParkingSpot :id="11" :data="data"/>
-            <ParkingSpot :id="12" :data="data"/>
-            <ParkingSpot :id="13" :data="data"/>
-            <ParkingSpot :id="14" :data="data"/>
-            <ParkingSpot :id="15" :data="data"/>
+            <ParkingSpot :id="11" :data="data" :licences="licences"/>
+            <ParkingSpot :id="12" :data="data" :licences="licences"/>
+            <ParkingSpot :id="13" :data="data" :licences="licences"/>
+            <ParkingSpot :id="14" :data="data" :licences="licences"/>
+            <ParkingSpot :id="15" :data="data" :licences="licences"/>
         </div>
     </div>
 </template>
@@ -39,7 +39,7 @@ import { onMounted, ref} from 'vue'
 import ParkingSpot from '../components/ParkingSpot.vue'
 
 let data = ref(null);
-
+let licences = ref(null);
 const fetchData = () => {
   const url = 'http://localhost:8000';
 
@@ -56,11 +56,26 @@ const fetchData = () => {
       // Update the reactive data
       data.value = rdata;
     });
+
 };
 
 onMounted(() =>{
     fetchData();
-  setInterval(fetchData, 1000); // Adjust the interval as needed
+  setInterval(fetchData, 3000); // Adjust the interval as needed
+  fetch('http://localhost:8000' + '/get-user-info', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      })
+        .then((response) => response.json())
+        .then((rdata) => {
+
+          // Update the reactive data
+          licences.value = rdata["license_plates"];
+          console.log("Llll", licences.value);
+        });
 });
 
 // fetch reservations

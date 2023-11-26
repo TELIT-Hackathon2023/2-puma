@@ -60,7 +60,11 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 app = FastAPI()
 
-origins = ["*"]
+origins = [
+    "http://localhost",
+    "http://localhost:8080",
+    "http://localhost:5173",
+]
 
 app.add_middleware(
     CORSMiddleware,
@@ -256,12 +260,12 @@ async def create_reservation(
     #Check if user already exists
     # print(user["email"])
     if not get_user(user["email"]):
-        raise HTTPException(status_code=400, detail="Email not registered", status="failed")
+        raise HTTPException(status_code=400, detail="Email not registered")
     spot_dict = app.database["spots"].find_one({"_id": reservation.spot_id})
 
     #Check if user has license plate
     if reservation.license_plate not in user["license_plates"]:
-        raise HTTPException(status_code=400, detail="License plate not registered", status="failed")
+        raise HTTPException(status_code=400, detail="License plate not registered")
     # if app.database["reservations"].find_one({"email": user["email"]}):
         # raise HTTPException(status_code=400, detail="User already has reservation", status="failed")
     # if app.database["reservations"].find_one({"license_plate": reservation.license_plate}):
