@@ -258,6 +258,10 @@ async def create_reservation(
     if not get_user(user["email"]):
         raise HTTPException(status_code=400, detail="Email not registered", status="failed")
     spot_dict = app.database["spots"].find_one({"_id": reservation.spot_id})
+
+    #Check if user has license plate
+    if reservation.license_plate not in user["license_plates"]:
+        raise HTTPException(status_code=400, detail="License plate not registered", status="failed")
     # if app.database["reservations"].find_one({"email": user["email"]}):
         # raise HTTPException(status_code=400, detail="User already has reservation", status="failed")
     # if app.database["reservations"].find_one({"license_plate": reservation.license_plate}):
