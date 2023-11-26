@@ -10,7 +10,7 @@
             <input type="password" v-model="password" id="password" placeholder="" name="" value="" class="textbox">
             <input class="btn" type="button" name="" value="Sign-in" @click="signIn"> 
         </div>
-        <router-link to="/register">Don't have an account?</router-link>
+        <router-link to="/register" style="color: #E10075;">Don't have an account?</router-link>
 <!--     
         <div class="textbox">
         <i class="fas fa-lock"></i>

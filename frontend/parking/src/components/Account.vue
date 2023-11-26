@@ -5,9 +5,10 @@
           <h1 class="header-text">Account Details</h1>
           <div class="login-inputs">
               <p class="input-text">License Plates:</p>
-              <input type="text" v-model="first_name" id="first_name" placeholder="" name="" value="AA111AA, AA222AA" class="textbox" readonly>
+              <input type="text" v-model="licenses" id="licenses" placeholder="" name="" value="AA111AA, AA222AA" class="textbox">
               <input class="btn" type="button" name="" value="Back" @click="goBack"> 
               <input class="btn" type="button" name="" value="Apply" @click="getData"> 
+              <input class="btn" type="button" name="" value="Logout" @click="logout"> 
           </div>
     <!--     
           <div class="textbox">
@@ -22,28 +23,29 @@
   
   <script>
   export default {
-      data() {
-          return {
-              first_name: '',
-              last_name: '',
-              phone: '',
-              email: '',
-              company_id: '',
-              password: '',
-              password2: ''
-          };
-      },
-      methods: {
-        goBack() {
-            window.location.href = '/'
-        },
-        getData() {
-            const url = 'http://localhost:8000//get-user-info'
-        }
-      }
-  
-  }
-  </script>
+  data() {
+    return {
+      licenses: '',
+    };
+  },
+  methods: {
+    goBack() {
+      window.location.href = '/';
+    },
+    getData() {
+      const url = 'http://localhost:8000/get-user-info';
+      //set license plate shit here
+    },
+    logout() {
+        console.log("logout");
+    }
+  },
+  mounted() {
+    // Set the value of the input element when the component is mounted
+    document.getElementById("licenses").value = "get licenses here";
+  },
+};
+</script>
   
   <style scoped>
   
