@@ -17,7 +17,8 @@ import { onMounted } from 'vue'
 export default {
     props: {
         id: Number,
-        color: String
+        color: String,
+        response: Object
     },
     data() {
         return {
