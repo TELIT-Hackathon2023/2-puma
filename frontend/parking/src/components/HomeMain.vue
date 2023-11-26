@@ -1,8 +1,14 @@
 <template>
   <main>
     <div class="side-bar">
-        <div class="location-dropdown pink-style">
-            <span>BCT-2</span>
+        <div class="location-dropdown">
+            <select class="selectbox" name="locations" id="locations">
+                <option value="BCT-1">BCT-1</option>
+                <option value="BCT-2">BCT-2</option>
+                <option value="CBT-1">CBT-1</option>
+                <option value="CBT-2">CBT-2</option>
+            </select> 
+            <!-- <span>BCT-2</span> -->
         </div>
 
         <div class="legend-div pink-style">
@@ -56,6 +62,20 @@ import Parking from '../components/Parking.vue'
     user-select: none;
 }
 
+.selectbox {
+    background: none;
+    color: black;
+    font-size: 20px;
+    width: 80%;
+    height: 50px;
+    border: 2px solid #E10075;
+    border-radius: 10px;
+    align-self: center;
+    padding-left: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Add additional styles specific to select element */
+}
+
 .pink-style {
     width: 80%;
     height: 45px;
@@ -70,6 +90,7 @@ import Parking from '../components/Parking.vue'
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     /* text-align: center; */
 }
 
