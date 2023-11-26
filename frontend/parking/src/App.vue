@@ -16,10 +16,11 @@ import { RouterLink, RouterView } from 'vue-router'
     <header>
       <div class="navbar">
         <img src="/Telekom.png" alt="" class="logo">
-        <RouterLink to="/account">
-          <!-- <img src="/user-solid.svg" alt="" class="people"> -->
+        <router-link to="/account" class="people"><img src="/user-solid.svg" alt="" class="people"/></router-link>
+        <!-- <RouterLink to="/account">
+          <img src="/user-solid.svg" alt="" class="people">
           <i class="fa-solid fa-user people fa-2xl black"></i>
-        </RouterLink>
+        </RouterLink> -->
         
       </div>
       <!-- <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" /> -->
@@ -66,7 +67,9 @@ import { RouterLink, RouterView } from 'vue-router'
 
 .people {
   margin-right: 50px;
-  height: 60%;
+  margin-top: 5px;
+  height: 80%;
+  /* height: 60%; */
   color: white;
   /* float: left; */
   /* display: block; */
