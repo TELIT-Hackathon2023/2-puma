@@ -15,9 +15,7 @@
             <p class="input-text">Company ID:</p>
             <input type="text" v-model="company_id" id="company_id" placeholder="" name="" value="" class="textbox">
             <p class="input-text">Password:</p>
-            <input type="password" v_model="password" id="password" placeholder="" name="" value="" class="textbox">
-            <p class="input-text">Confirm Password:</p>
-            <input type="password" v_model="password2" id="password2" placeholder="" name="" value="" class="textbox">
+            <input type="password" v-model="password" id="password" placeholder="" name="" value="" class="textbox">
             <input class="btn" type="button" name="" value="Sign up" @click="signUp"> 
         </div>
   <!--     
@@ -41,7 +39,6 @@ export default {
             email: '',
             company_id: '',
             password: '',
-            password2: ''
         };
     },
     methods: {
@@ -54,10 +51,10 @@ export default {
                 email: this.email,
                 company_id: this.company_id,
                 password: this.password,
-                license_plates: ["ECV-4562", "GHE-4325"],
+                license_plates: [],
                 status: "admin",
               }
-              if (this.password == this.password2) {
+              
                 console.log("yes")
                 fetch(url, {
                     method: 'POST',
@@ -73,7 +70,7 @@ export default {
                     }
                     else {
                       {
-                        // window.location.href = '/'
+                        window.location.href = '/'
                       }
                     }
                     // reload
@@ -82,7 +79,7 @@ export default {
                 .catch((error) => {
                     console.error('Error:', error);
                 });
-              }
+              
         }
     }
 
