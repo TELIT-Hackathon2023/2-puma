@@ -84,9 +84,10 @@ export default {
         this.selectedDate.getDate().toString().padStart(2, '0');
 
         console.log(formattedStartTime)
+        let url = 'http://localhost:8000'
         // TODO: Send a request to your server with the reservationDateTime
         // Example using fetch:
-        fetch('http://localhost:8000/reservation/create', {
+        fetch(url + '/reservation/create', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
