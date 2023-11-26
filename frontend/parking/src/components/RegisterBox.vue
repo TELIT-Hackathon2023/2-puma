@@ -73,7 +73,7 @@ export default {
                     }
                     else {
                       {
-                        window.location.href = '/'
+                        // window.location.href = '/'
                       }
                     }
                     // reload

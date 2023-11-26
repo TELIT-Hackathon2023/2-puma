@@ -13,6 +13,7 @@
               <div class="separator"></div>
               </div>
               <!-- <input type="text" v-model="licenses" id="licenses" placeholder="" name="" :value="licences" class="textbox"> -->
+              <input class="btn" type="button" name="" value="Add License" @click="addLicense"> 
               <input class="btn" type="button" name="" value="Back" @click="goBack"> 
               <input class="btn" type="button" name="" value="Logout" @click="logout"> 
           </div>
@@ -69,15 +70,52 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                  window.location.href = '/'                  
+                  if (data["message"] == "success") {
                     console.log(data)
-                    this.licenses.pop(index)        
+                    this.licenses.pop(index)  
+                  }
+                  else {
+                    alert(data["detail"])
+                  }
+                  // window.location.href = '/'                  
+      
                 })
                 .catch((error) => {
                     alert("Server is probably not runnning")
                     console.error('Error:', error);
                 });
 
+        },
+        addLicense() {
+          let plate = window.prompt("Enter License Plate", "xxx...")
+          const url = 'http://localhost:8000/add-license-plate'
+              const data = {
+                license_plate: plate
+                }
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                    'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                  if (data["message"] == "success") {
+                    console.log(data)
+                    this.licenses.push(plate)  
+                  }
+                  else {
+                    alert(data["detail"])
+                  }
+                  // window.location.href = '/'                  
+      
+                })
+                .catch((error) => {
+                    alert("Server is probably not runnning")
+                    console.error('Error:', error);
+                });
         }
   },
   mounted() {
