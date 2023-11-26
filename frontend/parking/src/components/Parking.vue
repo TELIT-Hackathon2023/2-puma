@@ -2,9 +2,9 @@
     <div class="vertical-flex-box">
         <div class="horizontal-flex-box">
             <!-- <ParkingSpot v-for="spot in parkingSpots" :key="spot.id" :id="spot.id" :response="spot.response || ''" /> -->
-            <ParkingSpot v-if="dataO != null" :id="1" :response="dataO"/>
-            <ParkingSpot :id="2"/>
-            <ParkingSpot :id="3"/>
+            <ParkingSpot :id="1" color="free"/>
+            <ParkingSpot :id="2" color="reserved"/>
+            <ParkingSpot :id="3" color="occupied"/>
             <ParkingSpot :id="4"/>
             <ParkingSpot :id="5"/>
         </div>
@@ -15,11 +15,6 @@
             <div class="parking-div empty bottom">
 
             </div>
-            <!-- <ParkingSpot/>
-            <ParkingSpot/>
-            <ParkingSpot/>
-            <ParkingSpot/>
-            <ParkingSpot/> -->
         </div>
         <div class="horizontal-flex-box">
             <ParkingSpot :id="6"/>
@@ -39,11 +34,12 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import ParkingSpot from '../components/ParkingSpot.vue'
 
 // fetch reservations
 const url = "http://localhost:8000"
-let dataO = null
+let data = null
 
 fetch(url + "/parking-spots/list-all", {
     method: 'GET',
@@ -55,7 +51,7 @@ fetch(url + "/parking-spots/list-all", {
 .then(response => response.json())
 .then(data => {
     console.log(data)
-    dataO = data
+    data = data
     // if (data.detail == "Invalid username or password") {
     //     alert("Invalid username or password")
     // }
@@ -71,9 +67,9 @@ fetch(url + "/parking-spots/list-all", {
 <style scoped>
 
 .empty {
-    background-color: white;
+    /* background-color: white; */
     height: 100%;
-    border: 2px solid #E10075;
+    /* border: 2px solid #E10075; */
 }
 
 .top {

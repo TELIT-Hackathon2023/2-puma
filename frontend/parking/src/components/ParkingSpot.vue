@@ -2,8 +2,8 @@
     <div class="parking-div">
         <div class="flex">
             <div class="image-div">
-                <img src="/circle-solid-gray2.svg" alt="" class="image">
-                <span class="text-center">A{{ id }}{{ response }}</span>
+                <img :src="image_path" alt="" class="image">
+                <span class="text-center">A{{ id }}</span>
             </div>
 
             
@@ -13,12 +13,51 @@
 </template>
 
 <script>
+import { onMounted } from 'vue'
 export default {
     props: {
         id: Number,
-        response: Object
+        color: String
+    },
+    data() {
+        return {
+            image_path: "/circle-solid-gray2.svg",
+
+        }
+    },
+    mounted() {
+        console.log(this.color)
+        if (this.color == "occupied") {
+            this.image_path = "/circle-solid-gray2.svg"
+            
+        }
+        else if (this.color == "reserved") {
+            this.image_path = "/circle-solid-orange.svg"
+            // set parking div background color class
+
+
+        }
+        else if (this.color == "free") {
+            this.image_path = "/circle-solid-purple.svg"
+        }
     }
+
 }
+
+// on mount
+
+// console.log(this.color)
+// if (this.color == "occupied") {
+//     let image_path = "/circle-solid-gray2.svg"
+// }
+// else if (this.color == "reserved") {
+//     let image_path = "/circle-solid-orange.svg"
+// }
+// else if (this.color == "free") {
+//     let image_path = "/circle-solid-purple.svg"
+// }
+
+// console.log(this.response[this.id-1])
 // console.log(this.response)
 </script>
 
@@ -31,6 +70,13 @@ export default {
         /* height: 250px; */
         /* width: 100px; */
         /* width: 50px; */
+    }
+    .occupied {
+        background-color: rgb(217, 217, 217);
+    }
+
+    .free {
+        background-color: rgb(217, 217, 217);
     }
     .image {
         width: 50px;
