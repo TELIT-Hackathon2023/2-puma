@@ -14,7 +14,16 @@
         <div v-if="showPopup" class="calendar-popup">
             <h1>Calendar</h1>
                 <VDatePicker v-model="selectedDate" color="pink" />
-                <input type="text" class="license-plate">
+                <!-- <input type="text" class="license-plate"> -->
+                <!-- <p>{{ licences }}</p> -->
+                <select v-model="selectedLicense" class="selectbox">
+                    <option v-for="(lic, key) in licences" 
+                            :value="key"
+                            :key="key">
+                    {{lic}}
+                    </option>
+                    <!-- <option v-for="license in licenses" :key="license.id" :value="license.id">{{ license.name }}</option> -->
+                </select>
             <span @click="reserveSpot">Confirm Reservation</span>
             <span @click="closeCalendar">Cancel</span>
         </div>
@@ -32,21 +41,23 @@ import { onMounted, ref } from 'vue'
 export default {
     props: {
         id: Number,
-        color: String,
+        licences: Array,
         data: Object
+
     },
     data() {
         return {
             image_path: "/circle-solid-gray2.svg",
             showPopup: false,
             selectedDate: null,
+            selectedLicense: null
             // showPopup
 
         }
     },
     methods: {
         updateImagePath() {
-        // console.log(this.data)
+        // console.log("licences", this.licences);
         // Update the image_path based on the color prop
         if (this.data) {
             // console.log(this.data[this.id-1])
@@ -60,6 +71,7 @@ export default {
         };
         },
         showCalendar() {
+            console.log(this.licences)
             console.log('showing calendar');
             this.showPopup = true;
         },
@@ -70,11 +82,12 @@ export default {
         },
 
         reserveSpot() {
-      if (this.selectedDate) {
+      if (this.selectedDate && this.selectedLicense !== null) {
         // Perform the reservation logic here
         // Send a request with selected date and time
         // const reservationDateTime = `${this.selectedDate}`;
-        const licensePlate = document.querySelector('.license-plate').value;
+        const licensePlate = this.licences[this.selectedLicense];
+        console.log(this.selectedLicense);
         console.log(`Spot reserved for: ${this.selectedDate} with license plate: ${licensePlate}`);
         const formattedStartTime =
         this.selectedDate.getFullYear() +
@@ -102,14 +115,20 @@ export default {
         .then(response => response.json())
         .then(data => {
         //   console.log('Reservation successful:', data);
-            alert(data['detail'])
+            
+            if (data["message"] == "success") {
+                alert(data['message'])
+                this.closeCalendar()
+            }
+            else {
+                alert(data['detail'])
+            }
           // Update your data or perform any additional actions
         })
         .catch(error => {
           console.error('Error making reservation:', error);
         });
 
-        this.closeCalendar();
       } else {
         // Show an error or prompt the user to select a date and time
         console.error('Please select a date and time for the reservation.');
@@ -256,4 +275,17 @@ export default {
     box-sizing: border-box;
   }
 
+  .selectbox {
+    background: none;
+    color: black;
+    font-size: 20px;
+    width: 80%;
+    height: 50px;
+    border: 2px solid #E10075;
+    border-radius: 10px;
+    align-self: center;
+    padding-left: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Add additional styles specific to select element */
+}
 </style>
