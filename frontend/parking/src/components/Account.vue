@@ -3,11 +3,17 @@
       <div class="login-box">
           <img src="/square-parking-solid.svg" class="icon" alt="">
           <h1 class="header-text">Account Details</h1>
-          <div class="login-inputs">
-              <p class="input-text">License Plates:</p>
-              <input type="text" v-model="licenses" id="licenses" placeholder="" name="" value="AA111AA, AA222AA" class="textbox">
+          <div class="login-inputs">  
+              <p class="header-text">License Plates:</p>
+              <div v-for="(license, index) in licenses" :key="index">
+              <div class="license-entry">
+                <p class="input-text">{{ license }}</p>
+                <input class="btn2" type="button" name="" value="Remove" @click="removeLicense(license, index)">
+              </div>
+              <div class="separator"></div>
+              </div>
+              <!-- <input type="text" v-model="licenses" id="licenses" placeholder="" name="" :value="licences" class="textbox"> -->
               <input class="btn" type="button" name="" value="Back" @click="goBack"> 
-              <input class="btn" type="button" name="" value="Apply" @click="getData"> 
               <input class="btn" type="button" name="" value="Logout" @click="logout"> 
           </div>
     <!--     
@@ -25,7 +31,7 @@
   export default {
   data() {
     return {
-      licenses: '',
+      licenses: [],
     };
   },
   methods: {
@@ -47,12 +53,54 @@
           document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
           window.location.href = '/'
       }
-    }
+    },
+    removeLicense(license, index) {
+           const url = 'http://localhost:8000/remove-license-plate'
+              const data = {
+                license_plate: license
+                }
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                    'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    this.licenses.pop(index)        
+                })
+                .catch((error) => {
+                    alert("Server is probably not runnning")
+                    console.error('Error:', error);
+                });
+
+        }
   },
   mounted() {
-    // Set the value of the input element when the component is mounted
-    document.getElementById("licenses").value = "get licenses here";
-  },
+    console.log("mounted")
+    const url = "http://localhost:8000/get-user-info"
+    let _data = null
+    fetch(url, {
+        method: 'GET',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        _data = data
+        // console.log(data["license_plates"])        
+        this.licenses = data["license_plates"]
+        console.log(this.licenses)
+        // document.getElementById("licenses").value = data["license_plates"];
+    })
+
+    // document.getElementById("licenses").value = data[0];
+},
 };
 </script>
   
@@ -71,8 +119,21 @@
     /* width: 100vw; */
   
   }
+  .license-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0px;
+  }
   
-  
+
+  .separator {
+    width: 100%;
+    height: 3px;
+    background-color: #E10075;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
   .login-box {
     width: 80%; /* Set a percentage width for better responsiveness */
     max-width: 480px; /* Set a maximum width to avoid it becoming too wide on larger screens */
@@ -177,6 +238,23 @@
     font-size: 18px;
     cursor: pointer;
     margin-top: 30px;
+    /* margin-bottom: 30px; */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.25s ease; /* Add a smooth transition effect */
+  }
+
+  .btn2 {
+    align-self: right;
+    height: 50px;
+    width: 30%;
+    background: #E10075;
+    border: 2px solid #E10075;
+    border-radius: 10px;
+    color: white;
+    padding: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 10px;
     /* margin-bottom: 30px; */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: background-color 0.25s ease; /* Add a smooth transition effect */
