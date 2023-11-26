@@ -2,11 +2,13 @@
     <div class="main">
     <div class="login-box">
         <img src="/square-parking-solid.svg" class="icon" alt="">
-        <div>
-        <!-- <i class="fas fa-user"></i> -->
-        <input type="text" id="email" placeholder="" name="" value="" class="textbox">
-        <input type="text" id="password" placeholder="" name="" value="" class="textbox" style="margin-top: 30px;">
-        </div>div>
+        <div class="login-inputs">
+            <p class="input-text">Email:</p>
+            <input type="text" id="email" placeholder="" name="" value="" class="textbox">
+            <p class="input-text">Password:</p>
+            <input type="password" id="password" placeholder="" name="" value="" class="textbox">
+            <input class="btn" type="button" name="" value="Sign-in"> 
+        </div>
 <!--     
         <div class="textbox">
         <i class="fas fa-lock"></i>
@@ -20,42 +22,8 @@
 
 <script>
 export default {
-    
-
 
 }
-const url = "http://localhost:8000"
-
-function login() {
-    console.log('login')
-    // get username and password
-    // const email = document.getElementById('email').value
-    // const password = document.getElementById('password').value
-    let email = "GG2@telekom.sk"
-    let password = "heslo123"
-    console.log(email)
-    console.log(password)
-    // send request to backend
-    fetch(url + '/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({email: email, password: password})
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log(data)
-        // save token in cookie
-        document.cookie = 'token=' + data.token
-        // redirect to home
-        window.location.href = '/'
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
-}
-
 </script>
 
 <style scoped>
@@ -64,7 +32,7 @@ function login() {
     /* center */
     display: flex;
     justify-content: center;
-    padding-top: 150px;
+    /* padding-top: 75px; */
     /* align-items: center; */
     /* margin-top: 100px; */
     /* background-color: #E10075; */
@@ -80,6 +48,7 @@ function login() {
     /* padding-top: 250px; */
     width: 480px;
     height: 500px;
+    margin-top: 75px;
     /* padding-top: 200px; */
     /* top: 55%; */
     /* left: 50%; */
@@ -92,6 +61,18 @@ function login() {
     border-radius: 30px;
     border: 3px solid #E10075;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.login-inputs {
+    /* background: black */
+    /* border: 1px solid black; */
+    display: flex;
+    flex-direction: column;
+    margin-top: 200px;
+    width: 80%;
+    height: 60%;
+    display: flex;
+    justify-content: center; 
 }
 
 .icon {
@@ -115,7 +96,6 @@ function login() {
     /* margin-bottom: 50px; */
     padding: 13px 0;
 }
-
 /* .textbox {
     width: 100%;
     overflow: hidden;
@@ -125,30 +105,82 @@ function login() {
     border-bottom: 1px solid #4caf50;
 } */
 
+.input-text {
+    display: inline-block;
+    color: black;
+    align-self: left;
+    margin-bottom: 0;
+}
+
 .textbox {
     
     background: none;
     color: black;
-    font-size: 18px;
-    width: 80%;
+    font-size: 20px;
+    width: 100%;
     height: 60px;
     border: 2px solid #E10075;
-    border-radius: 15px;
-    margin-top: 100px;
+    border-radius: 10px;
+    align-self: center;
+    padding-left: 10px;
+    /* margin-top: 30px; */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn {
-    width: 100%;
-    background: none;
-    border: 2px solid #4caf50;
+    align-self: center;
+    height: 50px;
+    width: 50%;
+    background: #E10075;
+    border: 2px solid #E10075;
+    border-radius: 10px;
     color: white;
     padding: 5px;
     font-size: 18px;
     cursor: pointer;
-    margin: 12px 0;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.25s ease; /* Add a smooth transition effect */
 }
 
+.btn:hover {
+  background-color: #b3045e; /* Change the background color on hover */
+}
 
+.btn:active {
+  background-color: #860246; /* Change the background color when pressed */
+  box-shadow: none; /* Remove the box shadow when pressed */
+}
+
+@media screen and (max-width: 768px) {
+  .main {
+    padding: 20px; /* Add padding to the main container for better spacing on smaller screens */
+  }
+
+  .login-box {
+    width: 100%; /* Make the login box full width on smaller screens */
+    margin-top: 0; /* Remove top margin */
+  }
+
+  .login-inputs {
+    margin-top: 20px; /* Adjust the top margin for the input container */
+  }
+
+  .icon {
+    width: 100px; /* Adjust the width of the icon for smaller screens */
+    padding-top: 20px; /* Adjust the top padding of the icon */
+  }
+
+  .textbox {
+    font-size: 16px; /* Adjust the font size of the textboxes for smaller screens */
+    height: 50px; /* Adjust the height of the textboxes */
+  }
+
+  .btn {
+    height: 40px; /* Adjust the height of the button for smaller screens */
+    margin-top: 20px; /* Adjust the top margin of the button */
+  }
+}
 
 </style>
