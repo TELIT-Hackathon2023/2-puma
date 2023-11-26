@@ -7,10 +7,17 @@
             <p class="input-text">Email:</p>
             <input type="text" v-model="email" id="email" placeholder="" name="" value="" class="textbox">
             <p class="input-text">Password:</p>
+<<<<<<< Updated upstream
             <input type="password" v-model="password" id="password" placeholder="" name="" value="" class="textbox">
             <input class="btn" type="button" name="" value="Sign-in" @click="signIn"> 
         </div>
         <router-link to="/register" style="color: #E10075;">Don't have an account?</router-link>
+=======
+            <input type="password" id="password" placeholder="" name="" value="" class="textbox">
+            <input class="btn" type="button" name="" value="Login"> 
+        </div>
+        <router-link to="/register">Don't have an account?</router-link>
+>>>>>>> Stashed changes
 <!--     
         <div class="textbox">
         <i class="fas fa-lock"></i>
