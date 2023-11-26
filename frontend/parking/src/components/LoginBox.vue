@@ -2,6 +2,7 @@
     <div class="main">
     <div class="login-box">
         <img src="/square-parking-solid.svg" class="icon" alt="">
+        <h1 class="header-text">Sign In</h1>
         <div class="login-inputs">
             <p class="input-text">Email:</p>
             <input type="text" v-model="email" id="email" placeholder="" name="" value="" class="textbox">
@@ -9,6 +10,7 @@
             <input type="password" v-model="password" id="password" placeholder="" name="" value="" class="textbox">
             <input class="btn" type="button" name="" value="Sign-in" @click="signIn"> 
         </div>
+        <router-link to="/register">Don't have an account?</router-link>
 <!--     
         <div class="textbox">
         <i class="fas fa-lock"></i>
@@ -85,7 +87,7 @@ export default {
     /* position: absolute; */
     /* padding-top: 250px; */
     width: 480px;
-    height: 500px;
+    height: 550px;
     margin-top: 75px;
     /* padding-top: 200px; */
     /* top: 55%; */
@@ -106,16 +108,16 @@ export default {
     /* border: 1px solid black; */
     display: flex;
     flex-direction: column;
-    margin-top: 200px;
+    margin-top: 0;
     width: 80%;
-    height: 60%;
+    height: 55%;
     display: flex;
     justify-content: center; 
 }
 
 .icon {
-    width: 150px;
-    padding-top: 40px;
+    width: 100px;
+    padding-top: 10px;
     /* top: 100px; */
     /* height: 100px; */
     fill: #E10075;
@@ -143,6 +145,16 @@ export default {
     border-bottom: 1px solid #4caf50;
 } */
 
+
+.header-text {
+    display: inline-block;
+    color: black;
+
+    margin-top: 130px;
+    margin-bottom: 0;
+    font-weight: bold;
+}
+
 .input-text {
     display: inline-block;
     color: black;
@@ -168,7 +180,7 @@ export default {
 .btn {
     align-self: center;
     height: 50px;
-    width: 50%;
+    width: 60%;
     background: #E10075;
     border: 2px solid #E10075;
     border-radius: 10px;
@@ -177,7 +189,7 @@ export default {
     font-size: 18px;
     cursor: pointer;
     margin-top: 30px;
-    margin-bottom: 30px;
+    /* margin-bottom: 30px; */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: background-color 0.25s ease; /* Add a smooth transition effect */
 }
