@@ -69,6 +69,7 @@
                 })
                 .then(response => response.json())
                 .then(data => {
+                  window.location.href = '/'                  
                     console.log(data)
                     this.licenses.pop(index)        
                 })
